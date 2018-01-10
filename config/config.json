@@ -1,0 +1,45 @@
+{
+  "name": "aura_test",
+  "version": "0.1",
+  "isDevelopment": true,
+  "log" : {
+    "path": "/data/logs/maizuo.log",
+    "name": "aura_test-log"
+  },
+  "businessManager": {
+    "port": "80",
+    "host": "business-manager.aurapt"
+  },
+  "businessProduct": {
+    "port": "80",
+    "host": "business-product.aurapt"
+  },
+  "businessPublic": {
+    "port": "80",
+    "host": "business-public.aurapt"
+  },
+  "businessDelivery": {
+    "port": "80",
+    "host": "business-delivery.aurapt"
+  },
+  "businessUser": {
+    "port": "80",
+    "host": "business-user.aurapt"
+  },
+  "businessMarketing": {
+    "port": "80",
+    "host": "business-marketing.aurapt"
+  },
+  "businessOrder": {
+    "port": "80",
+    "host": "business-order.aurapt"
+  },
+  "db":{
+    "dialect":"mysql",
+    "host":"xxx.xxx.x.xxx",
+    "port":"xxxx",
+    "user":"xxx",
+    "password":"xxxxxx",
+    "database":"xxxx"
+  }
+}
