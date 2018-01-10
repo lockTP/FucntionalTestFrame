@@ -1,10 +1,10 @@
 {
-  "name": "aura_test",
+  "name": "xxx",
   "version": "0.1",
   "isDevelopment": true,
   "log" : {
-    "path": "/data/logs/maizuo.log",
-    "name": "aura_test-log"
+    "path": "/data/logs/xxx.log",
+    "name": "xxxx-log"
   },
   "businessManager": {
     "port": "80",
