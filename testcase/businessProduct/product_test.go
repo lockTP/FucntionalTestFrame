@@ -158,7 +158,9 @@ func Test_Product(t *testing.T)  {
 
 		})
 
-		Convey("When 获取商品列表接口21 接口", func() {//渠道拉取商品列表测试，渠道ID为3
+		//渠道拉取商品列表测试，渠道ID为3
+		//两个商品，之拉回一个
+		Convey("When 获取商品列表接口21 接口", func() {
 			jsonStr := `{
 					    "isMultiSku": 1,
 					    "pageSize":10,
@@ -259,6 +261,7 @@ func Test_Product(t *testing.T)  {
 			})
 
 		})
+
 
 		Convey("When 获取商品详细信息 接口", func() {
 			requestAPI := "/api/v1/1/product/1002"
@@ -408,6 +411,24 @@ func Test_Product(t *testing.T)  {
 				queryProductSkuList := &model.QueryProductSkuList{}
 				json.Unmarshal(josnbyte, &queryProductSkuList)
 				So(len(queryProductSkuList.QueryProductSku), ShouldEqual, 2)
+			})
+
+		})
+
+		Convey("When 根据sku Ids 获取sku主要信息5 接口", func() {//拉取的sku中有未上架的商品，应该不返回该商品
+			jsonStr := `{
+					    "skuIds":["2","4"]
+					}`
+			requestAPI := "/api/v1/1/product/skuList"
+			result, _ := common.AccessAPIWithPostBody("POST", requestAPI, jsonStr, common.BUSINESS_PRODUCT)
+
+			Convey("Then 根据sku Ids 获取sku主要信息5 判定", func() {
+				So(result.Status, ShouldEqual, 0)
+				resultData := result.Data.(map[string]interface {})
+				josnbyte, _ := json.Marshal(resultData)
+				queryProductSkuList := &model.QueryProductSkuList{}
+				json.Unmarshal(josnbyte, &queryProductSkuList)
+				So(len(queryProductSkuList.QueryProductSku), ShouldEqual, 1)
 			})
 
 		})

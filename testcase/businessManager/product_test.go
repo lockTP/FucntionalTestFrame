@@ -1084,6 +1084,7 @@ func Test_Product(t *testing.T)  {
 					fmt.Println(err.Error())
 				}
 				So(count, ShouldEqual, 1)
+
 			})
 
 		})
@@ -1094,7 +1095,7 @@ func Test_Product(t *testing.T)  {
 					    "productId":1003,
 					    "masterName":"充电宝",
 					    "slaveName":"机器猫充电宝, 满100减20",
-					    "supplierId":1,
+					    "supplierId":2,
 					    "categoryId": 3,
 					    "productSource":1,
 					    "isVirtualProduct":1,
@@ -1112,13 +1113,43 @@ func Test_Product(t *testing.T)  {
 				if err != nil {
 					fmt.Println(err.Error())
 				}
-				So(supplierId, ShouldEqual, 1)
+				So(supplierId, ShouldEqual, 2)
 				So(masterName, ShouldEqual, "充电宝")
 				So(productSource, ShouldEqual, 1)
 				So(displaySalesCount, ShouldEqual, 999)
+				var count2 int
+				sql = "SELECT count(1) FROM product_set_info WHERE master_product_id = ? AND status = 1"
+				err = common.DB.QueryRow(sql, 1003).Scan(&count2)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+				So(count2, ShouldEqual, 1)
 			})
 
 		})
+
+		Convey("When 修改product2 接口", func() {//供应商有订单，不允许修改供应商测试
+			jsonStr := `{
+					    "productId":1003,
+					    "masterName":"充电宝",
+					    "slaveName":"机器猫充电宝, 满100减20",
+					    "supplierId":1,
+					    "categoryId": 3,
+					    "productSource":1,
+					    "isVirtualProduct":1,
+					    "displaySalesCount":999,
+					    "deliveryType":0
+					}`
+			requestAPI := "/api/v1/product/set"
+			result, _ := common.AccessAPIWithPostBody("POST", requestAPI, jsonStr, common.BUSINESS_MANAGER)
+			Convey("Then 修改product2 判定", func() {
+				So(result.Status, ShouldEqual, 6606033)
+
+			})
+
+		})
+
+
 
 
 		Convey("When 删除product 接口", func() {
@@ -1136,6 +1167,20 @@ func Test_Product(t *testing.T)  {
 					fmt.Println(err.Error())
 				}
 				So(count, ShouldEqual, 0)
+				var count2 int
+				sql = "SELECT count(id) FROM product_exchange_code WHERE product_id = ? AND flag = 1 AND status = 0"
+				err = common.DB.QueryRow(sql, 1003).Scan(&count2)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+				So(count2, ShouldEqual, 1)
+				var count3 int
+				sql = "SELECT count(id) FROM product_exchange_code WHERE product_id = ? AND flag = 0 AND status = 0"
+				err = common.DB.QueryRow(sql, 1003).Scan(&count3)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+				So(count3, ShouldEqual, 0)
 			})
 
 		})
@@ -1242,8 +1287,8 @@ func Test_Product(t *testing.T)  {
 				}
 				So(count, ShouldEqual, 2)
 				var skuCount uint32
-				sql = "SELECT sku_count FROM product_set_info WHERE sku_id = ? AND status = 0"
-				err = common.DB.QueryRow(sql, 2).Scan(&skuCount)
+				sql = "SELECT sku_count FROM product_set_info WHERE sku_id = ? AND master_sku_id = ? AND status = 0"
+				err = common.DB.QueryRow(sql, 2, 1).Scan(&skuCount)
 				if err != nil {
 					fmt.Println(err.Error())
 				}
@@ -1355,6 +1400,37 @@ func Test_Product(t *testing.T)  {
 				json.Unmarshal(josnbyte, &data)
 				So(data.MasterName, ShouldEqual, "sit测试商品")
 				So(data.ProductSkuList[0].AvailableInventory, ShouldEqual, 100)
+			})
+		})
+
+		Convey("When 根据选项获取sku列表接口1 接口", func() {//用于电影排序更新拉取
+			jsonStr := `{
+							"optionId":1002,
+							"optionValue":"选项值21",
+							"pageSize":30,
+							"pageNumber":1,
+							"sortKey":"price",
+							"sortType":"desc"
+						}`
+			requestAPI := "/api/v1/sku/skuListbyOption"
+			result, _ := common.AccessAPIWithPostBody("POST", requestAPI, jsonStr, common.BUSINESS_MANAGER)
+			Convey("Then 根据选项获取sku列表接口1 判定", func() {
+				So(result.Status, ShouldEqual, 0)
+				resultData := result.Data.(map[string]interface{})
+				So(resultData["total"], ShouldEqual, 2)
+				josnbyte, _ := json.Marshal(resultData)
+				querSkuByOption := &model.QuerSkuByOption{}
+				json.Unmarshal(josnbyte, &querSkuByOption)
+				flagContain := false
+				for _, v :=  range querSkuByOption.List{
+					if v.ID == 2 {
+						flagContain = true
+						So(v.MasterName, ShouldEqual, "master_name2")
+						So(v.CostPrice, ShouldEqual, 70)
+						So(len(v.Options), ShouldEqual, 2)
+					}
+				}
+				So(flagContain, ShouldBeTrue)
 			})
 		})
 		//common.ExecuteSQLScriptFile("./../../config/product_clean.sql")

@@ -289,3 +289,27 @@ type QueryProductInfobySkuidlistRespData struct {
 	SkuSlaveName  string `json:"skuSlaveName"`
 	Image         string `json:"image"`
 }
+
+type QuerSkuByOption struct {
+	List []SkuDetail `json:"list"`
+}
+
+type SkuDetail struct {
+	ID                 uint64  `json:"id"`
+	Image              string `json:"image"`
+	MarketPrice        uint32  `json:"marketPrice"`
+	MasterName         string `json:"masterName"`
+	Price              uint32  `json:"price"`
+	CostPrice          uint32  `json:"costPrice"`
+	SalesCount         uint32  `json:"salesCount"`
+	Score              uint32  `json:"score"`
+	SlaveName          string `json:"slaveName"`
+	Inventory          uint32 `json:"inventory"`
+	AvailableInventory uint32 `json:"availableInventory"`
+	Options            []*Option `json:"options"`
+}
+
+type Option struct {
+	Id    uint64 `json:"id"`
+	Value string `json:"value"`
+}

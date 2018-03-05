@@ -96,7 +96,11 @@ func Test_Saleschannel(t *testing.T)  {
 						"skuId":1,
 						"price":1000,
 						"availableInventory":200
-					    }]
+					    },{
+						"skuId":3,
+						"price":1000,
+						"availableInventory":-1
+						}]
 					}]
 
 				}`
@@ -125,6 +129,13 @@ func Test_Saleschannel(t *testing.T)  {
 					fmt.Println(err.Error())
 				}
 				So(count, ShouldEqual, 1)
+				var count2 uint32
+				sql = "SELECT count(1) FROM product_attr WHERE product_id = ? AND attr_id = ? AND attr_value = ? AND status = 0"
+				err = common.DB.QueryRow(sql, 13, 27, 100).Scan(&count2)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+				So(count2, ShouldEqual, 1)
 			})
 
 		})
@@ -198,31 +209,7 @@ func Test_Saleschannel(t *testing.T)  {
 		})
 
 
-		Convey("When  查询单个商品所有销售渠道信息 接口", func() {
-			requestAPI := "/api/v1/saleschannelproduct/QueryProductAllSalesChannelInfo?productId=12"
-			result, _ := common.AccessAPIWithPostBody("GET", requestAPI, "", common.BUSINESS_MANAGER)
-			Convey("Then  查询单个商品所有销售渠道信息 判定", func() {
-				So(result.Status, ShouldEqual, 0)
-				resultData := result.Data.(map[string]interface{})
-				So(resultData["list"], ShouldNotBeNil)
-				josnbyte, _ := json.Marshal(resultData)
-				queryProductAllSalesChannelInfoResp := &model.QueryProductAllSalesChannelInfoResp{}
-				json.Unmarshal(josnbyte, &queryProductAllSalesChannelInfoResp)
-				for _, productAllSalesChannelInfoList := range queryProductAllSalesChannelInfoResp.List {
-					if productAllSalesChannelInfoList.SalesChannelId == 100 {
-						So(productAllSalesChannelInfoList.SkuList[0].AvailableInventory, ShouldEqual, 30)
-						So(productAllSalesChannelInfoList.SkuList[0].Inventory, ShouldEqual, 50)
-						So(productAllSalesChannelInfoList.SkuList[0].TotalAvailableInventory, ShouldEqual, 130)
-					} else if productAllSalesChannelInfoList.SalesChannelId == 104 {
-						So(productAllSalesChannelInfoList.SkuList[0].AvailableInventory, ShouldEqual, -1)
-						So(productAllSalesChannelInfoList.SkuList[0].Inventory, ShouldEqual, 0)
-						So(productAllSalesChannelInfoList.SkuList[0].TotalAvailableInventory, ShouldEqual, 130)
-					}
-				}
 
-			})
-
-		})
 
 
 		Convey("When  批量删除sku销售渠道信息 接口", func() {
@@ -481,7 +468,7 @@ func Test_Saleschannel(t *testing.T)  {
 			result, _ := common.AccessAPIWithPostBody("POST", requestAPI, jsonStr, common.BUSINESS_MANAGER)
 			Convey("Then  批量更新销售渠道商品信息 判定", func() {
 				So(result.Status, ShouldEqual, 6606005)
-				So(result.Msg, ShouldEqual, "sku库存不足")
+				So(result.Msg, ShouldEqual, "设置的skuId（2）在渠道Id（100)中过高，sku库存不足")
 			})
 
 		})
@@ -705,6 +692,32 @@ func Test_Saleschannel(t *testing.T)  {
 				}
 				So(skuAvailableInventory, ShouldEqual, 80)
 				So(skuInventory, ShouldEqual, 180)
+			})
+
+		})
+
+		Convey("When  查询单个商品所有销售渠道信息 接口", func() {
+			requestAPI := "/api/v1/saleschannelproduct/QueryProductAllSalesChannelInfo?productId=12"
+			result, _ := common.AccessAPIWithPostBody("GET", requestAPI, "", common.BUSINESS_MANAGER)
+			Convey("Then  查询单个商品所有销售渠道信息 判定", func() {
+				So(result.Status, ShouldEqual, 0)
+				resultData := result.Data.(map[string]interface{})
+				So(resultData["list"], ShouldNotBeNil)
+				josnbyte, _ := json.Marshal(resultData)
+				queryProductAllSalesChannelInfoResp := &model.QueryProductAllSalesChannelInfoResp{}
+				json.Unmarshal(josnbyte, &queryProductAllSalesChannelInfoResp)
+				for _, productAllSalesChannelInfoList := range queryProductAllSalesChannelInfoResp.List {
+					if productAllSalesChannelInfoList.SalesChannelId == 100 {
+						So(productAllSalesChannelInfoList.SkuList[0].AvailableInventory, ShouldEqual, 30)
+						So(productAllSalesChannelInfoList.SkuList[0].Inventory, ShouldEqual, 50)
+						So(productAllSalesChannelInfoList.SkuList[0].TotalAvailableInventory, ShouldEqual, 130)
+					} else if productAllSalesChannelInfoList.SalesChannelId == 104 {
+						So(productAllSalesChannelInfoList.SkuList[0].AvailableInventory, ShouldEqual, -1)
+						So(productAllSalesChannelInfoList.SkuList[0].Inventory, ShouldEqual, 0)
+						So(productAllSalesChannelInfoList.SkuList[0].TotalAvailableInventory, ShouldEqual, 130)
+					}
+				}
+
 			})
 
 		})

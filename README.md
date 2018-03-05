@@ -5,17 +5,6 @@
 ## 准备工作
 发布项目置aurapt上
 data层需要连接SIT测试数据库
-配置为：
-"db": {
-      "dialect": "mysql",
-      "host": "192.168.1.204",
-      "port": 3306,
-      "user": "web",
-      "password": "123456",
-      "database": "d_aura_sit",
-      "maxIdle": 20,
-      "maxOpen": 20
-    }
 
 
 ## 代码解析
@@ -64,8 +53,6 @@ Then为预期结果测试<br>
 ## 第三方接口调用
 在使用第三方调用时，使用mockee来进行虚拟，可修改配置文件讲发送地址改为下方地址：<br>
 http://mockee.miz.so/<br>
-我们的项目为：<br>
-aura.maizuo.com<br>
 内部接口调用方式如：http://mockee.miz.so/aura/delivery<br>
 
 ## 预期效果
